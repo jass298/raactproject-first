@@ -1,0 +1,61 @@
+import axios from 'axios';
+import './App.css';
+import React, { useEffect, useState } from 'react'
+
+function Fetch() {
+
+    const [list, setList] = useState([]);
+    const [lists, setLists] = useState([]);
+    const [listpro, setlistpro] = useState([]);
+
+    useEffect(() => {
+        axios.get('http://localhost:8000/getpro')
+            .then((res) => setlistpro(res.data))
+    }, []);
+
+    useEffect(() => {
+        axios.get("http://localhost:8000/getcategories")
+            .then(res => setList(res.data))
+    }, []);
+
+    useEffect(() => {
+        axios.get("http://localhost:8000/getsubcategories")
+            .then(res => setLists(res.data))
+    }, []);
+
+
+    return (
+
+        <>
+
+            <div>
+
+                {
+                    listpro.map((item, i) => (
+                        <div>
+                            Category:<p key={i}>{item.category}</p>
+                            Sub Category:<p>{item.subcategory}</p>
+                            Product Name:<p>{item.productName}</p>
+                            Product Price:<p>{item.productPrice}</p>
+                            Price Before discount:<p>{item.productPriceBeforeDiscount}</p>
+                            Price After discount:<p>{item.productPriceAfterDiscount}</p>
+                            Product Description:<p>{item.productDescription}</p>
+                            Shipping Charge:<p>{item.shippingCharge}</p>
+                            Availability:<p>{item.productAvailability}</p>
+
+
+                            <img src={`http://localhost:8000/${item.img1}`} height={200} width={200} />
+                            <img src={`http://localhost:8000/${item.img2}`} />
+                            <img src={`http://localhost:8000/${item.img3}`} />
+
+                        </div>
+                    ))
+                }
+
+            </div>
+        </>
+    );
+};
+
+
+export default Fetch
