@@ -1,0 +1,67 @@
+import axios from 'axios';
+import React, { useState } from 'react'
+
+
+const Subcategory = () => {
+    const [category, setCategory] = useState('');
+    const [subcat, setSubcat] = useState('');
+    const [description, setDescription] = useState('');
+
+    function handleSubmit(e) {
+        e.preventDefault();
+        const data = { subcat: subcat }
+        axios.post('http://localhost:8000/savesubcat', data).then(res => console.log(res.data));
+        const data1 = { category: category, description: description }
+        axios.post('http://localhost:8000/savecat', data1).then(res => console.log(res.data));
+    }
+
+    return (
+        <>
+        <div >
+         
+        </div>
+            <div className='flex gap-100 mt-10'>
+          
+                <form onSubmit={handleSubmit}>
+                    Category <input type="text" name='category' value={category} onChange={(e) => setCategory(e.target.value)} /> <br /><br />
+                    SubCategory Name <input type="text" name='subcat' value={subcat} onChange={(e) => setSubcat(e.target.value)} /> <br /> <br />
+                    Description <input type="text" name='description' value={description} onChange={(e) => setDescription(e.target.value)} /> <br /> <br />
+                    <button className='px-8 py-2 bg-blue-600 rounded'>Create</button>
+                </form>
+            </div>
+        </>
+    )
+}
+
+export default Subcategory
+
+
+
+// import axios from 'axios';
+// import React, { useState } from 'react'
+
+// function Subcategory() {
+
+//     const[subcat,setSubcat] = useState('')
+
+// function handlesubcat (e) {
+// setSubcat(e.target.value)
+// }
+// function handlesubmit(e){
+//          e.preventDefault();
+
+//        const data ={subcat :subcat}
+//        axios.post('http://localhost:8000/subcat',data).then((res )=>console.log(res))
+
+// }
+
+//   return (
+//     <div>
+//         <h1> add Subcategory</h1>
+//             <input type="text" name="subcat" placeholder="Subcategory" value={subcat} onChange={handlesubcat} />
+//          <button onClick={handlesubmit} >Submit</button>
+//          </div>
+//   )
+// }
+
+// export default Subcategory
