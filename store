@@ -1,0 +1,29 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import App from './App';         // main component
+import Category from './Category'; // optional
+import Fetch from './Fetch';
+import Subcategory from './Subcategory';
+import HomePage from './HomePage';
+import UpdateProduct from './UpdateProduct';
+
+function Store() {
+  return (
+    // <div className="store-container">
+    <>
+      <Routes>
+        <Route exact path="/" element={<App />} />
+        <Route path='/home' elememt={<HomePage />} />
+        <Route path="/category" element={<Category />} />
+        <Route path='/subcategory' element={<Subcategory/>} />
+        <Route path="/fetch" element={<Fetch />} />
+        <Route path="/update" element={<UpdateProduct />} />
+      </Routes>
+    </>
+    // </div>
+  );
+}
+
+export default Store;
+
+
