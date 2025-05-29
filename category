@@ -1,0 +1,111 @@
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
+
+
+const Category = () => {
+    const [name, setName] = useState('');
+    const [list, setList] = useState([]);
+
+
+    function handleSubmit(e) {
+        e.preventDefault();
+        const data = { name: name };
+        axios.post('http://localhost:8000/savecat', data).then(res => console.log(res.data))
+    }
+    useEffect(()=>{
+        axios.get('http://localhost:8000/getcategories').then(res=> setList(res.data))
+    }, [])
+    return (
+        <>
+
+            <div className='flex gap-10'>
+                <div className='mt-10'>
+
+                 
+                </div>
+
+                <div className='mt-10 text-center'>
+                    <form onSubmit={handleSubmit}>
+                      Add Product's category Name <input type="text" name='name' value={name} onChange={(e) => setName(e.target.value)} /> <br /><br />
+                        <button className='px-8 py-2 bg-blue-600 rounded'>Create</button>
+                    </form>
+                    <table border={1} className='border-2 h-[500px] w-[800px]'>
+                        <tr className='border-2'>
+
+                            <th className='border-2'>Id</th>
+                            <th className='border-2'>Name</th>
+
+                        </tr>
+                        <tbody>
+
+                            {
+                                list.map((item, index) => (
+                                    <tr key={index}>
+                                        <td className='border-2'>{item.id}</td>
+                                        <td className='border-2'>{item.name}</td>
+                                    </tr>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default Category
+
+
+
+
+// function Category() {
+//   const [category, setCatname] = useState('');
+//   const [subcat, setSubcat] = useState('');
+//   const [description, setDescription] = useState('');
+//     const [mylist, setMylist] = useState([])
+  
+
+//   function handlecategory(e) {
+// setCatname(e.target.value)
+//   }
+//   function handledesub(e) {
+// setSubcat(e.target.value)
+//   }
+//   function handleDescription(e) {
+// setDescription(e.target.value)
+//   }
+//   function handleSubmit(e){
+
+//        e.preventDefault();
+// //        const data = {
+// //         category:category ,
+// //         subcat :subcat,
+// //         description :description
+
+// //        }
+// // console.log(data)
+
+// const formData = new FormData();
+// formData.append('category', category);
+// formData.append('subcat', subcat);
+// formData.append('description', description);
+
+//     axios.post("http://localhost:8000/saveproduct/", formData)
+//       .then(res => setMylist([]))
+//        .catch(err => console.error(err));
+// // console.log(mylist)
+//   }
+
+//   return (
+
+//     <div>
+//       Category  <input type="text" value={category} onChange={handlecategory} />
+//       Sub category  <input type="text" value={subcat} onChange={handledesub} />
+//       Description <input type="text" value={description} onChange={handleDescription} />
+//       <button onClick={handleSubmit} >Submit</button>
+//     </div>
+//   )
+// }
+
+// export default Category;
