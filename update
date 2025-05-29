@@ -1,0 +1,399 @@
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+
+function UpdateProduct() {
+    const [category, setCategory] = useState('');
+    const [subcategory, setSubcategory] = useState('');
+    const [productName, setProductName] = useState('');
+    const [productCompany, setProductCompany] = useState('');
+    const [productPrice, setProductPrice] = useState(0);
+    const [productPriceBeforeDiscount, setProductPriceBeforeDiscount] = useState(0);
+    const [productPriceAfterDiscount, setProductPriceAfterDiscount] = useState(0);
+    const [productDescription, setProductDescription] = useState('');
+    const [shippingCharge, setShippingCharge] = useState(0);
+    const [productAvailability, setProductAvailability] = useState('');
+    const [id, setId] = useState('');
+
+    const [img1, setImg1] = useState('');
+    const [img2, setImg2] = useState('');
+    const [img3, setImg3] = useState('');
+
+    const [list, setList] = useState([]);
+    const [lists, setLists] = useState([]);
+    const [listpro, setlistpro] = useState([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:8000/getcategories").then(res => setList(res.data));
+        axios.get("http://localhost:8000/getsubcategories").then(res => setLists(res.data));
+        axios.get('http://localhost:8000/getpro').then(res => setlistpro(res.data));
+    }, []);
+
+    function handleImg1(e) {
+        setImg1(e.target.files[0]);
+    }
+
+    function handleImg2(e) {
+        setImg2(e.target.files[0]);
+    }
+
+    function handleImg3(e) {
+        setImg3(e.target.files[0]);
+    }
+
+    function handleEdit(e) {
+        const selectedId = e.target.id;
+        setId(selectedId);
+        alert(selectedId)
+
+        const data = listpro.find(item => item.id == selectedId);
+        if (!data) return;
+
+        setCategory(data.category);
+        setSubcategory(data.subcategory);
+        setProductCompany(data.productCompany);
+        setProductName(data.productName);
+        setProductPrice(data.productPrice);
+        setProductPriceBeforeDiscount(data.productPriceBeforeDiscount);
+        setProductPriceAfterDiscount(data.productPriceAfterDiscount);
+        setProductDescription(data.productDescription);
+        setShippingCharge(data.shippingCharge);
+        setProductAvailability(data.productAvailability);
+    }
+
+    function handleUpdate(e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('id', id); // include id to update the right product
+        formData.append('category', category);
+        formData.append('subcategory', subcategory);
+        formData.append('productName', productName);
+        formData.append('productCompany', productCompany);
+        formData.append('productPrice', productPrice);
+        formData.append('productPriceBeforeDiscount', productPriceBeforeDiscount);
+        formData.append('productPriceAfterDiscount', productPriceAfterDiscount);
+        formData.append('productDescription', productDescription);
+        formData.append('shippingCharge', shippingCharge);
+        formData.append('productAvailability', productAvailability);
+        formData.append('img1', img1);
+        formData.append('img2', img2);
+        formData.append('img3', img3);
+
+        axios.post('http://localhost:8000/updatePro', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+}).then(res => {
+  console.log(res.data);
+});
+            // Optionally, reload product list after update
+            axios.get('http://localhost:8000/getpro').then(res => setlistpro(res.data));
+    
+    }
+
+   function handleDelete(e) {
+        const id = e.target.id;
+        const data = { id: id };
+        axios.post('http://localhost:8000/prodelete', data).then((res) => setList([]))
+    }
+    
+
+    return (
+        <div>
+            <h1>This is Updation Field.</h1>
+
+            <form onSubmit={handleUpdate} encType='multipart/form-data'>
+                Product Category
+                <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                    <option value="">select category</option>
+                    {list.map((item, index) => (
+                        <option key={index} value={item.id}>{item.name}</option>
+                    ))}
+                </select>
+                <br /><br />
+
+                Product Sub Category
+                <select value={subcategory} onChange={(e) => setSubcategory(e.target.value)}>
+                    <option value="">select sub category</option>
+                    {lists.map((item, index) => (
+                        <option key={index} value={item.id}>{item.subcat}</option>
+                    ))}
+                </select>
+                <br /><br />
+
+                Product Name
+                <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} />
+                <br /><br />
+
+                Company Name
+                <input type="text" value={productCompany} onChange={(e) => setProductCompany(e.target.value)} />
+                <br /><br />
+
+                Product Price
+                <input type="text" value={productPrice} onChange={(e) => setProductPrice(e.target.value)} />
+                <br /><br />
+
+                Product Price Before Discount
+                <input type="text" value={productPriceBeforeDiscount} onChange={(e) => setProductPriceBeforeDiscount(e.target.value)} />
+                <br /> <br />
+
+                Product Price After Discount
+                <input type="text" value={productPriceAfterDiscount} onChange={(e) => setProductPriceAfterDiscount(e.target.value)} />
+                <br /> <br />
+
+                Product Description
+                <input type="text" value={productDescription} onChange={(e) => setProductDescription(e.target.value)} />
+                <br /><br />
+
+                Shipping Charge
+                <input type="text" value={shippingCharge} onChange={(e) => setShippingCharge(e.target.value)} />
+                <br /><br />
+
+                Product Availability
+                <select value={productAvailability} onChange={(e) => setProductAvailability(e.target.value)}>
+                    <option value="">Select Availability</option>
+                    <option value="Available">Available</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                </select>
+                <br /><br />
+
+                Choose Image1: <input type="file" onChange={handleImg1} accept="image/*" /><br />
+                Choose Image2: <input type="file" onChange={handleImg2} accept="image/*" /><br />
+                Choose Image3: <input type="file" onChange={handleImg3} accept="image/*" /><br />
+                <button type="submit" className='px-8 py-2 bg-blue-600 rounded'>Update</button>
+            </form>
+
+            <br /><br />
+
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Image</th><th>Product Name</th><th>Price</th><th>Before discount</th><th>After discount</th>
+                        <th>Description</th><th>Shipping Charge</th><th>Availability</th><th>Edit</th><th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {listpro.map((item) => (
+                        <tr key={item.id}>
+                            <td><img src={`http://localhost:8000/${item.img1}`} height={100} width={100} alt="product" /></td>
+                            <td>{item.productName}</td>
+                            <td>{item.productPrice}</td>
+                            <td>{item.productPriceBeforeDiscount}</td>
+                            <td>{item.productPriceAfterDiscount}</td>
+                            <td>{item.productDescription}</td>
+                            <td>{item.shippingCharge}</td>
+                            <td>{item.productAvailability}</td>
+                            <td><button id={item.id} onClick={handleEdit}>Edit</button></td>
+                            <td><button id={item.id} onClick={handleDelete}>Delete</button></td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+export default UpdateProduct;
+
+
+
+// import axios from 'axios';
+// import React, { useEffect, useState } from 'react'
+
+// function UpdateProduct() {
+//     const [category, setCategory] = useState('');
+//     const [subcategory, setSubcategory] = useState('');
+//     const [productName, setProductName] = useState('');
+//     const [productCompany, setProductCompany] = useState('');
+//     const [productPrice, setProductPrice] = useState(0);
+//     const [productPriceBeforeDiscount, setProductPriceBeforeDiscount] = useState(0);
+//     const [productPriceAfterDiscount, setProductPriceAfterDiscount] = useState(0);
+//     const [productDescription, setProductDescription] = useState('');
+//     const [shippingCharge, setShippingCharge] = useState(0);
+//     const [productAvailability, setProductAvailability] = useState('');
+//     const [id, setId] = useState('');
+
+//     const [img1, setImg1] = useState('');
+//     const [img2, setImg2] = useState('');
+//     const [img3, setImg3] = useState('');
+
+//     const [list, setList] = useState([]);
+//     const [lists, setLists] = useState([]);
+//     const [listpro, setlistpro] = useState([]);
+
+//     function handleImg1(e) {
+//         setImg1(e.target.files[0]);
+//     }
+
+//     function handleImg2(e) {
+//         setImg2(e.target.files[0]);
+//     }
+
+//     function handleImg3(e) {
+//         setImg3(e.target.files[0]);
+//     }
+
+
+//     useEffect(() => {
+//         axios.get("http://localhost:8000/getcategories")
+//             .then(res => setList(res.data))
+//     }, []);
+
+//     useEffect(() => {
+//         axios.get("http://localhost:8000/getsubcategories")
+//             .then(res => setLists(res.data))
+//     }, []);
+
+//     useEffect(() => {
+//         axios.get('http://localhost:8000/getpro')
+//             .then((res) => setlistpro(res.data))
+//     }, []);
+
+
+//     function handleEdit(e) {
+
+//      const selectedId = e.target.id;
+//      setId(selectedId);
+//      alert(selectedId);
+     
+//         // console.log(id)
+//         const data = listpro.filter(item => item.id == id)
+
+//         console.log(data)
+
+//         setCategory(data[0].category);
+//         setSubcategory(data[0].subcategory);
+//         setProductCompany(data[0].productCompany);
+//         setProductName(data[0].productName);
+//         setProductPrice(data[0].productPrice);
+//         setProductPriceBeforeDiscount(data[0].productPriceBeforeDiscount);
+//         setProductPriceAfterDiscount(data[0].productPriceAfterDiscount);
+//         setProductDescription(data[0].productDescription);
+//         setShippingCharge(data[0].shippingCharge);
+//         setProductAvailability(data[0].productAvailability);
+//          setId(data[0].id);
+
+
+//         axios.post('http://localhost:8000/upadatePro', formData, {
+//             headers: { 'Content-Type': 'multipart/form-data' }
+//         }).then(res => console.log(res.data));
+//     }
+//     }
+
+//     function handleUpdate(e) {
+   
+//         e.preventDefault();
+
+//         const formData = new FormData();
+        
+//         formData.append('category', category)
+//         formData.append('subcategory', subcategory)
+//         formData.append('productName', productName)
+//         formData.append('productCompany', productCompany)
+//         formData.append('productPrice', productPrice)
+//         formData.append('productPriceBeforeDiscount', productPriceBeforeDiscount)
+//         formData.append('productPriceAfterDiscount', productPriceAfterDiscount)
+//         formData.append('productDescription', productDescription)
+//         formData.append('shippingCharge', shippingCharge)
+//         formData.append('productAvailability', productAvailability)
+
+//         formData.append('img1', img1)
+//         formData.append('img2', img2)
+//         formData.append('img3', img3)
+
+
+//         // axios.post('http://localhost:8000/upadatePro', formData, {
+//         //     headers: { 'Content-Type': 'multipart/form-data' }
+//         // }).then(res => console.log(res.data));
+//     }
+    
+//     return (
+
+//         <div>
+//             <h1>This is Updation Field.</h1>
+
+//             <form onSubmit={handleUpdate} encType='multipart/form-data'>
+
+//                 Product Category <select value={category} name="category" id="" onChange={(e) => setCategory(e.target.value)}>
+//                     <option value="">select category</option>
+//                     {
+//                         list.map((item, index) => (
+//                             <option key={index} value={item.id}>{item.name}</option>
+//                         ))
+//                     }
+//                 </select>
+//                 <br /><br />
+
+
+//                 Product Sub Category <select value={subcategory} name="subcategory" id="" onChange={(e) => setSubcategory(e.target.value)}>
+//                     <option value="">select sub category</option>
+//                     {
+//                         lists.map((item, index) => (
+//                             <option key={index} value={item.id}>{item.subcat}</option>
+//                         ))
+//                     }
+//                 </select>
+//                 <br /><br />
+
+//                 Product Name<input type="text" name='productName' value={productName} onChange={(e) => setProductName(e.target.value)} /> <br /><br />
+//                 Company Name <input type="text" name='productCompany' value={productCompany} onChange={(e) => setProductCompany(e.target.value)} /> <br /><br />
+//                 Product Price <input type="text" name='productPrice' value={productPrice} onChange={(e) => setProductPrice(e.target.value)} /> <br /><br />
+//                 Product Price Before Discount <input type="text" name='productPriceBeforeDiscount' value={productPriceBeforeDiscount} onChange={(e) => setProductPriceBeforeDiscount(e.target.value)} /> <br /> <br />
+//                 Product Price After Discount <input type="text" name='productPriceAfterDiscount' value={productPriceAfterDiscount} onChange={(e) => setProductPriceAfterDiscount(e.target.value)} /> <br /> <br />
+//                 Product Description <input type="text" name='productDescription' value={productDescription} onChange={(e) => setProductDescription(e.target.value)} /> <br /><br />
+//                 Shipping Charge <input type="text" name='shippingCharge' value={shippingCharge} onChange={(e) => setShippingCharge(e.target.value)} /> <br /><br />
+
+//                 Product Availability <select name="productAvailability" value={productAvailability} id="" onChange={(e) => setProductAvailability(e.target.value)}>
+//                     <option value="">Select Availability</option>
+//                     <option value="Available">Available</option>
+//                     <option value="Out of Stock">Out of Stock</option>
+//                 </select>
+//                 <br /><br />
+
+//                 Choose Image1: <input type="file" id="file" name="file" onChange={handleImg1} accept="image/*" /><br></br>
+//                 Choose Image2: <input type="file" id="file" name="file" onChange={handleImg2} accept="image/*" /><br></br>
+//                 Choose Image3: <input type="file" id="file" name="file" onChange={handleImg3} accept="image/*" /><br></br>
+//                 <button className='px-8 py-2 bg-blue-600 rounded'>Update</button>
+//                 <br />
+//                 <br />
+
+//             </form>
+//             <br />
+//             <br />
+
+//             {/* table */}
+
+//             <table border="1">
+//                 <thead>
+//                     <tr>
+//                         <th>Image</th><th>Product Name</th><th>Price</th><th>Before discount</th><th>After discount</th>
+//                         <th>Discription</th><th>Shipping Charge</th><th>Availbility</th>
+//                     </tr>
+//                 </thead>
+//                 <tbody>
+//                     {listpro.map((item) => (
+//                         <tr key={item.id}>
+//                             <td><img src={`http://localhost:8000/${item.img1}`} height={200} width={200} /></td>
+//                             <td>{item.productName}</td>
+//                             <td>{item.productPrice}</td>
+//                             <td>{item.productPriceBeforeDiscount}</td>
+//                             <td>{item.productPriceAfterDiscount}</td>
+//                             <td>{item.productDescription}</td>
+//                             <td>{item.shippingCharge}</td>
+//                             <td>{item.productAvailability}</td>
+
+//                             <td><button id={item.id} onClick={handleEdit}>Edit</button></td>
+
+//                             {/* <button onClick={handleUpdate}><th>Update</th></button> */}
+//                         </tr>
+//                     ))}
+//                 </tbody>
+//             </table>
+//         </div>
+
+//     )
+// }
+// //  <p key={i}>{item.category}</p>
+// //  <p>{item.subcategory}</p>
+
+
+
+// export default UpdateProduct
