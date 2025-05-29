@@ -1,0 +1,194 @@
+const path = require('path');
+const express = require('express');
+const bodyparser = require('body-parser');
+const app = express();
+const mysql = require('mysql2');
+const cors = require('cors');
+const multer = require('multer');
+
+
+const conn = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'root',
+  database: 'myproduct'
+});
+
+//connect to database
+conn.connect((err) => {
+  if (err) throw err;
+  console.log('Mysql Connected...');
+});
+
+
+app.use('/upload', express.static('upload'));
+app.use(bodyparser.urlencoded({ extended: false }));
+app.use(bodyparser.json());
+
+app.use(cors())
+
+
+app.get('/getcategories', (req, res) => {
+  let sql = "SELECT * from categories";
+  let query = conn.query(sql, (err, mydata) => {
+    if (err) throw err;
+    res.json(mydata);
+  });
+
+});
+
+
+app.get('/getsubcategories', (req, res) => {
+  let sql = "SELECT * from subcategory";
+  let query = conn.query(sql, (err, mydata) => {
+    if (err) throw err;
+    res.json(mydata);
+  });
+
+});
+
+
+app.get('/getpro', (req, res) => {
+  let sql = "SELECT * from products";
+  let query = conn.query(sql, (err, mydata) => {
+    if (err) throw err;
+    res.json(mydata);
+  });
+
+});
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'upload/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + file.originalname);
+  }
+})
+
+// console.log(docName);
+
+const upload = multer({ storage: storage });
+
+
+app.post('/saveproduct', upload.fields([
+  { name: 'img1', maxCount: 1 },
+  { name: 'img2', maxCount: 1 },
+  { name: 'img3', maxCount: 1 }
+]), (req, res) => {
+  let imagePaths = {
+    img1: req.files['img1'] ? req.files['img1'][0].path : null,
+    img2: req.files['img2'] ? req.files['img2'][0].path : null,
+    img3: req.files['img3'] ? req.files['img3'][0].path : null
+  };
+
+  let sql = `INSERT INTO products (category, subcategory, productName, productCompany, productPrice, productPriceBeforeDiscount, productPriceAfterDiscount, productDescription, shippingCharge, productAvailability, img1, img2, img3) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+  let values = [
+    req.body.category,
+    req.body.subcategory,
+    req.body.productName,
+    req.body.productCompany,
+    req.body.productPrice,
+    req.body.productPriceBeforeDiscount,
+    req.body.productPriceAfterDiscount,
+    req.body.productDescription,
+    req.body.shippingCharge,
+    req.body.productAvailability,
+    imagePaths.img1,
+    imagePaths.img2,
+    imagePaths.img3
+  ];
+
+  conn.query(sql, values, (err, result) => {
+    if (err) throw err;
+    res.json({ 'success': 'product inserted' });
+  });
+});
+
+
+//for updation 
+
+
+app.post('/updatePro', upload.fields([
+  { name: 'img1', maxCount: 1 },
+  { name: 'img2', maxCount: 1 },
+  { name: 'img3', maxCount: 1 }
+]), (req, res) => {
+  const imagePaths = {
+    img1: req.files['img1'] ? req.files['img1'][0].path : null,
+    img2: req.files['img2'] ? req.files['img2'][0].path : null,
+    img3: req.files['img3'] ? req.files['img3'][0].path : null
+  };
+
+  const sql = `UPDATE products SET 
+    category = ?, 
+    subcategory = ?, 
+    productName = ?, 
+    productCompany = ?, 
+    productPrice = ?, 
+    productPriceBeforeDiscount = ?, 
+    productPriceAfterDiscount = ?, 
+    productDescription = ?, 
+    shippingCharge = ?, 
+    productAvailability = ?, 
+    img1 = ?, 
+    img2 = ?, 
+    img3 = ? 
+    WHERE id = ?`;
+
+  const values = [
+    req.body.category,
+    req.body.subcategory, // fix case sensitivity
+    req.body.productName,
+    req.body.productCompany,
+    req.body.productPrice,
+    req.body.productPriceBeforeDiscount,
+    req.body.productPriceAfterDiscount,
+    req.body.productDescription,
+    req.body.shippingCharge,
+    req.body.productAvailability,
+    imagePaths.img1,
+    imagePaths.img2,
+    imagePaths.img3,
+    req.body.id // fix the ID key name
+  ];
+
+  conn.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('Update failed:', err);
+      return res.status(500).json({ error: 'Database update error' });
+    }
+    res.json({ success: 'Product updated successfully' });
+  });
+});
+
+
+app.post('/savecat', (req, res) => {
+  let sql = "insert into categories(name) values('" + req.body.name + "')";
+  conn.query(sql, (err, mydata) => {
+    if (err) throw err;
+    res.json({ 'success': 'Category Created!' })
+  })
+})
+
+app.post('/prodelete', (req, res) => {
+  let sql = "delete from products where id=" + req.body.id;
+  conn.query(sql, (err, mydata) => {
+    if (err) throw err;
+    res.json({ 'success': 'Product Deleted!' })
+  })
+})
+
+app.post('/savesubcat', (req, res) => {
+  let sql = "insert into subcategory(subcat) values('" + req.body.subcat + "')";
+  conn.query(sql, (err, mydata) => {
+    if (err) throw err;
+    res.json({ 'success': 'Sub Category Created!' })
+  })
+})
+
+//server listening
+app.listen(8000, () => {
+  console.log('Server is running at port 8000');
+});
